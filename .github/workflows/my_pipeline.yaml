@@ -2,8 +2,8 @@ name: My pipeline
 
 on:
     push:
-      branches:
-        - 'v[0-9]+.[0-9]+'
+      #branches:
+        #- 'v[0-9]+.[0-9]+'
 
 jobs:
   pipeline_tasks:
@@ -95,7 +95,7 @@ jobs:
            Matriculation: A0285991J
            *Email*: wke7517@gmail.com
            *Git*: https://github.com/${{ github.repository }}
-           *Image*: https://hub.docker.com/repository/docker/tigerwk/myapp/general
+           *Image*: https://hub.docker.com/repository/docker/tigerwk/myapp
         SLACK_COLOR: "good"
         SLACK_ICON: https://github.com/rtCamp.png?size=48
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
