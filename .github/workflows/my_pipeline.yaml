@@ -2,8 +2,8 @@ name: My pipeline
 
 on:
     push:
-      #branches:
-        #- 'v[0-9]+.[0-9]+'
+      branches:
+        - 'v[0-9]+.[0-9]+'
 
 jobs:
   pipeline_tasks:
@@ -28,7 +28,7 @@ jobs:
         ignore-unfix: true
         format: 'table'
         output: 'trivy-report.txt'
-        severity: 'CRITICAL'
+        severity: 'HIGH'
         exit-code: 1
          #CRITICAL,HIGH
         
@@ -37,7 +37,7 @@ jobs:
       if: failure()
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_CHANNEL: mytest
+        SLACK_CHANNEL: submission
         SLACK_TITLE: Scan failed-Fred
         SLACK_MESSAGE: 'Failed trivy scan,see uploaded report :frowning:'
         SLACK_COLOR: "danger"
@@ -70,14 +70,14 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         push: true
-        tags: tigerwk/myapp:${{github.sha}}
+        tags: tigerwk/workshop:${{github.sha}}
       
     - name: Install Cosign
       uses: sigstore/cosign-installer@v3.1.1
   
     - name: Sign image with a key
       run: |
-        cosign sign --yes --key env://COSIGN_PRIVATE_KEY "tigerwk/myapp:${{github.sha}}"
+        cosign sign --yes --key env://COSIGN_PRIVATE_KEY "tigerwk/workshop:${{github.sha}}"
       env:
         TAGS: ${{ steps.build-and-push.outputs.digest }}
         COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
@@ -87,7 +87,7 @@ jobs:
       id: slack_success_message
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_CHANNEL: mytest
+        SLACK_CHANNEL: submission
         SLACK_TITLE: Image build and signed
         SLACK_MESSAGE: |
            ':tada:'
@@ -95,7 +95,7 @@ jobs:
            Matriculation: A0285991J
            *Email*: wke7517@gmail.com
            *Git*: https://github.com/${{ github.repository }}
-           *Image*: https://hub.docker.com/repository/docker/tigerwk/myapp
+           *Image*: https://hub.docker.com/repository/docker/tigerwk/workshop
         SLACK_COLOR: "good"
         SLACK_ICON: https://github.com/rtCamp.png?size=48
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
