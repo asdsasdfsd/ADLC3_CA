@@ -1,0 +1,101 @@
+name: My pipeline
+
+on:
+    push:
+      branches:
+        - 'v[0-9]+.[0-9]+'
+
+jobs:
+  pipeline_tasks:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.commits[0].message,'#NORUN')}}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Check commit message
+      run: |
+        commit=$(git log -1 --pretty=%B)
+        if [[ $commit == *"#NORUN"* ]]; then
+        exit 1
+        fi
+
+    - name: Run Trivy vulnerability scanner in fs mode
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        ignore-unfix: true
+        format: 'table'
+        output: 'trivy-report.txt'
+        severity: 'CRITICAL'
+        exit-code: 1
+         #CRITICAL,HIGH
+        
+    - name: Send a message to slack
+      id: slack_message
+      if: failure()
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_CHANNEL: mytest
+        SLACK_TITLE: Scan failed-Fred
+        SLACK_MESSAGE: 'Failed trivy scan,see uploaded report :frowning:'
+        SLACK_COLOR: "danger"
+        SLACK_ICON: https://github.com/rtCamp.png?size=48
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+  
+    - name: Upload the report
+      if: failure()
+      uses: MeilCli/slack-upload-file@v3
+      with:
+        slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+        channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
+        file_path: 'trivy-report.txt'
+        initial_comment: 'fail report post by WangKe'
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+  
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+  
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+  
+    - name: Build and push
+      id: build-and-push
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: tigerwk/myapp:${{github.sha}}
+      
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@v3.1.1
+  
+    - name: Sign image with a key
+      run: |
+        cosign sign --yes --key env://COSIGN_PRIVATE_KEY "tigerwk/myapp:${{github.sha}}"
+      env:
+        TAGS: ${{ steps.build-and-push.outputs.digest }}
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      
+    - name: Send a message to slack
+      id: slack_success_message
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_CHANNEL: mytest
+        SLACK_TITLE: Image build and signed
+        SLACK_MESSAGE: |
+           ':tada:'
+           Name: WangKe
+           Matriculation: A0285991J
+           *Email*: wke7517@gmail.com
+           *Git*: https://github.com/${{ github.repository }}
+           *Image*: https://hub.docker.com/repository/docker/tigerwk/myapp/general
+        SLACK_COLOR: "good"
+        SLACK_ICON: https://github.com/rtCamp.png?size=48
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
