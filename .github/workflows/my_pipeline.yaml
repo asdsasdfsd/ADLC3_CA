@@ -28,7 +28,7 @@ jobs:
         ignore-unfix: true
         format: 'table'
         output: 'trivy-report.txt'
-        severity: 'CRITICAL'
+        severity: 'HIGH'
         exit-code: 1
          #CRITICAL,HIGH
         
@@ -37,7 +37,6 @@ jobs:
       if: failure()
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_CHANNEL: submission
         SLACK_TITLE: Scan failed-Fred
         SLACK_MESSAGE: 'Failed trivy scan,see uploaded report :frowning:'
         SLACK_COLOR: "danger"
@@ -87,7 +86,6 @@ jobs:
       id: slack_success_message
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_CHANNEL: submission
         SLACK_TITLE: Image build and signed
         SLACK_MESSAGE: |
            ':tada:'
