@@ -40,7 +40,7 @@ jobs:
         SLACK_TITLE: Scan failed-Fred
         SLACK_MESSAGE: 'Failed trivy scan,see uploaded report :frowning:'
         SLACK_COLOR: "danger"
-        SLACK_USERNAME: Wang Ke
+        SLACK_USERNAME: DipSA 57 CICD 
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
   
     - name: Upload the report
@@ -86,7 +86,7 @@ jobs:
       id: slack_success_message
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_USERNAME: Wang Ke
+        SLACK_USERNAME: DipSA 57 CICD 
         SLACK_TITLE: Image build and signed
         SLACK_MESSAGE: |
            ':tada:'
