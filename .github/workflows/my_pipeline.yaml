@@ -28,7 +28,7 @@ jobs:
         ignore-unfix: true
         format: 'table'
         output: 'trivy-report.txt'
-        severity: 'CRITICAL'
+        severity: 'HIGH'
         exit-code: 1
          #CRITICAL,HIGH
         
@@ -38,9 +38,9 @@ jobs:
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_TITLE: Scan failed-Fred
-        SLACK_MESSAGE: 'Failed trivy scan,see uploaded report'
+        SLACK_MESSAGE: 'Failed trivy scan,see uploaded report :frowning:'
         SLACK_COLOR: "danger"
-        SLACK_ICON: https://github.com/rtCamp.png?size=48
+        SLACK_USERNAME: Wang Ke
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
   
     - name: Upload the report
@@ -86,8 +86,10 @@ jobs:
       id: slack_success_message
       uses: rtCamp/action-slack-notify@v2
       env:
+        SLACK_USERNAME: Wang Ke
         SLACK_TITLE: Image build and signed
         SLACK_MESSAGE: |
+           ':tada:'
            Name: WangKe
            Matriculation: A0285991J
            *Email*: wke7517@gmail.com
