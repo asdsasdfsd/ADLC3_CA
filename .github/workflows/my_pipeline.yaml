@@ -14,18 +14,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Check commit message
-      run: |
-        commit=$(git log -1 --pretty=%B)
-        if [[ $commit == *"#NORUN"* ]]; then
-        exit 1
-        fi
-
     - name: Run Trivy vulnerability scanner in fs mode
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
-        ignore-unfix: true
+        ignore-unfixed: true
         format: 'table'
         output: 'trivy-report.txt'
         severity: 'HIGH'
